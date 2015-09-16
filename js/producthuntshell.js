@@ -154,7 +154,6 @@ $(function() {
             url = this.redirect_url;
             content.push(url);
             id = this.id;
-            //pagination_id.push(this.id);
             posts.push(id);
             name = this.name;
             discussion_url = this.discussion_url;
@@ -233,7 +232,6 @@ $(function() {
             url = this.redirect_url;
             content.push(url);
             id = this.id;
-            //pagination_id.push(this.id);
             posts.push(id);
             name = this.name;
             discussion_url = this.discussion_url;
@@ -1396,8 +1394,8 @@ $(function() {
         autocomplete = autocomplete.reduce(function(a,b){if(a.indexOf(b)<0)a.push(b);return a;},[]);
         ls_state = command.join(" ");
         term.set_prompt(auth_user+'@producthunt:~'+pwd+'/$ ');
-        term.resume();
       });
+      term.resume();
       setTimeout(function(){if (!success){term.resume();term.echo("<span class='err'>error fetching data from product hunt</span>", {raw:true});}}, 10000);
     // LOGIN
     } else if (command[1] == "login") {
@@ -1500,49 +1498,10 @@ $(function() {
         error: function(jqXHR, textStatus, errorThrown) {
           success = false;
           term.echo("<span class='err'>error - you may need to re-authorize product hunt shell by typing login</span>", {raw:true});
-          term.resume();
-        }
-      });
-    // NOTIFICATIONS DESTROY
-    } else if (usertoken && command[1] == "notifications" && command[2] == "destroy" && !command[3]) {
-      success = false;
-      $.ajax({ 
-        url: 'https://api.producthunt.com/v1/notifications',
-        type: 'DELETE',
-        dataType: 'json',
-        beforeSend: function(xhr) { 
-          xhr.setRequestHeader("Content-Type", "application/json");
-          xhr.setRequestHeader("Authorization", "Bearer " + usertoken);
-        },
-        crossDomain: true,
-        success: function(data) {
-          success = true;
-          var notificationjson = data.notifications;
-          $(notificationjson).each(function() {
-            id = this.id;
-            pagination_id.push(this.id);
-            sentence = this.sentence;
-            url = this.reference.url;
-            aStr = sentence.match(/\w+|"[^"]+"/g), i = aStr.length;
-            while(i--){
-              aStr[i] = aStr[i].replace(/"/,"<a href=\""+url+"\" target=\"_blank\">\"");
-            }
-            sentence = aStr.join(" ");
-            created_at = this.reference.created_at;
-            time = moment(created_at).fromNow();
-            username = this.from_user.username;
-            autocomplete.push(username);
-            line1 = "<div class='post-wrapper'><span id='index'>"+sentence+"</a><br />" + time + " by @"+username+"<p /></div>";
-            term.echo(line1, {raw:true});
-          });
-        },
-        error: function(jqXHR, textStatus, errorThrown) {
-          success = false;
-          term.echo("<span class='err'>error - you may need to re-authorize product hunt shell by typing login</span>", {raw:true});
         }
       });
       term.resume();
-    } else if (usertoken && command[1] == "settings") {
+    } else if (usertoken && command[1] == "settings" && !command[2]) {
       $.ajax({ 
         url: 'https://api.producthunt.com/v1/me',
         type: 'GET',
@@ -1578,7 +1537,7 @@ $(function() {
           term.resume();
         }
       });
-    } else if (!usertoken && command[1] == "settings") {
+    } else if (!usertoken && command[1] == "settings" && !command[2]) {
       if (showimages) {
         term.echo("display images is currently: <strong>on</strong>", {raw:true});
       } else {
